@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gorilla Hub</title>
+  <meta name="description" content="Gorilla Hub — tutorials, cosmetics, AI helper, and community features for Gorilla Tag players."/>
+  <style>
+    /* =========================
+       THEME / LAYOUT (all inline)
+       ========================= */
+    :root{
+      --bg: #07121a;
+      --card:#0f1724;
+      --text:#e6eef8;
+      --muted:#98a2b3;
+      --accent:#6b9cff;
+      --accent-2:#6ecb9f;
+      --glass: rgba(255,255,255,0.02);
+      --radius:12px;
+      --shadow: 0 8px 28px rgba(0,0,0,0.6);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background: linear-gradient(180deg,var(--bg), color-mix(in srgb,var(--bg) 95%, black 5%));
+      color:var(--text);-webkit-font-smoothing:antialiased;padding-bottom:80px;
+    }
+
+    header{position:sticky;top:0;z-index:40;background:linear-gradient(180deg, rgba(2,6,23,0.6), rgba(0,0,0,0.2));backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,0.02)}
+    .container{max-width:1100px;margin:0 auto;padding:14px;display:flex;gap:12px;align-items:center}
+    .logo{display:flex;gap:12px;align-items:center}
+    .mark{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:900;color:#041022}
+    nav{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+    .tabs{display:flex;gap:6px}
+    .tab{padding:8px 12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.02);cursor:pointer;font-weight:700;color:var(--text)}
+    .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041022}
+
+    .btn{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px;background:var(--accent);color:#041022;border:none;cursor:pointer;font-weight:800}
+    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text)}
+
+    main{max-width:1100px;margin:18px auto;padding:18px}
+    .page{display:none}
+    .page.active{display:block}
+
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px}
+    @media (max-width:980px){ .grid{grid-template-columns:1fr} .container{padding:10px}}
+
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:var(--shadow)}
+    h1,h2,h3{margin:0 0 8px 0}
+    p{margin:0 0 10px 0;color:var(--muted)}
+
+    .muted{color:var(--muted);font-size:13px}
+    .tiny{font-size:12px;color:var(--muted)}
+
+    .tutorial-list{display:flex;flex-direction:column;gap:10px}
+    .tutorial-item{display:flex;gap:10px;align-items:center;padding:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:10px}
+
+    table{width:100%;border-collapse:collapse}
+    thead th{padding:8px;text-align:left;color:var(--muted);font-weight:700}
+    tbody td{padding:10px;border-top:1px solid rgba(255,255,255,0.02)}
+
+    .chat-window{height:320px;overflow:auto;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+    .bubble{display:inline-block;padding:10px 12px;border-radius:12px;margin-bottom:8px;max-width:78%}
+    .bubble.user{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#041022;margin-left:auto}
+    .bubble.bot{background:rgba(255,255,255,0.02)}
+
+    .form-input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text)}
+
+    footer{margin-top:28px;text-align:center;color:var(--muted);padding:18px}
+    .hidden{display:none}
+    .inline-edit{border:1px dashed rgba(255,255,255,0.03);padding:8px;border-radius:8px}
+  </style>
+</head>
+<body>
+  <!-- Header / Tabs -->
+  <header>
+    <div class="container">
+      <div class="logo">
+        <div class="mark" id="logoMark">GH</div>
+        <div>
+          <div style="font-weight:900">Gorilla Hub</div>
+          <div class="tiny muted">Play • Learn • Customize</div>
+        </div>
+      </div>
+
+      <nav>
+        <div class="tabs" role="tablist" aria-label="Main navigation">
+          <button class="tab active" data-page="home">Home</button>
+          <button class="tab" data-page="tutorials">Tutorials</button>
+          <button class="tab" data-page="cosmetics">Cosmetics</button>
+          <button class="tab" data-page="ai">AI Helper</button>
+          <button class="tab" data-page="support">Support</button>
+          <button class="tab" data-page="faq">FAQ</button>
+          <button class="tab" data-page="settings">Settings</button>
+          <button class="tab" data-page="account">Account</button>
+        </div>
+
+        <div style="width:12px"></div>
+
+        <div style="display:flex;gap:8px;align-items:center">
+          <div id="authArea">
+            <button id="loginBtn" class="btn ghost">Login</button>
+            <button id="signupBtn" class="btn">Sign up</button>
+          </div>
+          <div id="userArea" class="hidden" style="align-items:center;display:flex;gap:8px">
+            <div id="userName" class="tiny muted">User</div>
+            <button id="logoutBtn" class="btn ghost">Logout</button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main content (pages managed as "tabs") -->
+  <main>
+    <!-- HOME -->
+    <section id="home" class="page active">
+      <div class="grid">
+        <div>
+          <div class="card">
+            <h1 id="homeTitle">Gorilla Hub</h1>
+            <p id="homeAbout">Welcome to Gorilla Hub — your central hub for Gorilla Tag tutorials, cosmetics, and tools.</p>
+            <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn" onclick="openPage('tutorials')">View Tutorials</button>
+              <button class="btn ghost" onclick="openPage('cosmetics')">Cosmetics</button>
+              <button class="btn ghost" onclick="openPage('ai')">AI Helper</button>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <h3>Tutorial Highlights</h3>
+            <div id="tutorialPreview" class="tutorial-list" style="margin-top:10px"></div>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <h3>Top Cosmetics</h3>
+            <div id="cosmeticPreview" class="tiny muted" style="margin-top:8px"></div>
+          </div>
+        </div>
+
+        <aside>
+          <div class="card">
+            <h4>Quick actions</h4>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+              <button class="btn ghost" onclick="openPage('support')">Contact Support</button>
+              <button class="btn ghost" onclick="openPage('settings')">Settings</button>
+              <button class="btn ghost" id="adminPanelBtn">Admin Panel</button>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px;">
+            <h4>Account demo</h4>
+            <p class="tiny muted">Email login & role-based admin. Admins can edit content live.</p>
+            <div id="roleDisplay" class="tiny muted" style="margin-top:8px">Not signed in</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- TUTORIALS -->
+    <section id="tutorials" class="page">
+      <div class="card">
+        <h2>Tutorials</h2>
+        <p class="tiny muted">Click a tutorial to view or (if admin) edit the content.</p>
+
+        <div id="tutorialList" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <!-- COSMETICS -->
+    <section id="cosmetics" class="page">
+      <div class="card">
+        <h2>Cosmetics Rarity Table</h2>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <input id="cosSearch" class="form-input" placeholder="Search cosmetics..."/>
+          <select id="rarityFilter" class="form-input" style="max-width:160px">
+            <option value="">All rarities</option>
+          </select>
+          <div style="flex:1"></div>
+          <button id="exportBtn" class="btn ghost">Export JSON</button>
+        </div>
+
+        <div style="margin-top:12px;overflow:auto;">
+          <table id="cosTable">
+            <thead><tr><th>Name</th><th>Type</th><th>Rarity</th><th>Image</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI -->
+    <section id="ai" class="page">
+      <div class="card">
+        <h2>AI Helper</h2>
+        <p class="tiny muted">Ask ChatGPT for tips, cosmetic info, or tutorial help. Your OpenAI key is stored securely in Vercel and used server-side — the browser never holds the secret.</p>
+
+        <div id="aiAuthMsg" class="card hidden tiny muted">Please log in to use the AI Helper.</div>
+
+        <div id="aiPanel" class="card hidden" style="margin-top:12px">
+          <div class="chat-window" id="chatWindow" aria-live="polite"></div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <input id="chatInput" class="form-input" placeholder="Ask the AI helper..." />
+            <button id="sendChat" class="btn">Send</button>
+          </div>
+          <div class="tiny muted" style="margin-top:8px">Responses are produced by ChatGPT (server-proxied through Vercel).</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUPPORT (Formspree) -->
+    <section id="support" class="page">
+      <div class="card">
+        <h2>Support</h2>
+        <p class="tiny muted">Contact us using the form below.</p>
+
+        <form id="supportForm" action="https://formspree.io/f/xvgqdlkd" method="POST" style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+          <input name="name" class="form-input" placeholder="Your name" required />
+          <input name="_replyto" type="email" class="form-input" placeholder="Your email" required />
+          <textarea name="message" class="form-input" placeholder="How can we help?" rows="6" required></textarea>
+          <div style="display:flex;gap:8px">
+            <button class="btn" type="submit">Send</button>
+            <button class="btn ghost" type="reset">Reset</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="page">
+      <div class="card">
+        <h2>FAQ</h2>
+        <div style="margin-top:12px">
+          <h4>How do I sign up?</h4>
+          <p class="muted">Use the Sign up button in the header to create an email/password account.</p>
+
+          <h4>How do I become an admin?</h4>
+          <p class="muted">Site owners promote accounts to admin via Supabase (or via the Admin panel if you permit).</p>
+
+          <h4>Where is my data stored?</h4>
+          <p class="muted">User accounts and site content live in Supabase. OpenAI requests are proxied through Vercel functions.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="page">
+      <div class="card">
+        <h2>Settings</h2>
+        <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
+          <label style="display:flex;gap:8px;align-items:center">
+            <input type="checkbox" id="darkToggle" /> Dark mode
+          </label>
+          <div style="flex:1"></div>
+          <button id="saveSettings" class="btn ghost">Save</button>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>Language</h4>
+          <select id="langSelect" class="form-input" style="max-width:260px">
+            <option value="en">English</option>
+            <option value="es">Español (placeholder)</option>
+            <option value="de">Deutsch (placeholder)</option>
+          </select>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h4>Theme Accent</h4>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="color" id="accent" value="#6b9cff"/>
+            <input type="color" id="accent2" value="#6ecb9f"/>
+            <button id="applyTheme" class="btn ghost">Apply</button>
+            <button id="resetTheme" class="btn">Reset</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACCOUNT / ADMIN -->
+    <section id="account" class="page">
+      <div class="card">
+        <h2>Account</h2>
+        <div id="accountContent"></div>
+      </div>
+
+      <div class="card hidden" id="adminPanel" style="margin-top:12px">
+        <h3>Admin Panel — Live Edit</h3>
+        <p class="tiny muted">Edit site text, tutorial content, videos, and images. Changes are sent to the server and applied live.</p>
+
+        <div style="margin-top:12px">
+          <h4>Site settings</h4>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+            <label>Site title</label>
+            <input id="adminSiteTitle" class="form-input"/>
+            <label>Home about text</label>
+            <textarea id="adminHomeAbout" class="form-input" rows="4"></textarea>
+            <label>Logo text (small)</label>
+            <input id="adminLogoText" class="form-input"/>
+            <div style="display:flex;gap:8px">
+              <button id="saveSiteSettings" class="btn">Save</button>
+              <button id="revertSiteSettings" class="btn ghost">Revert</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px">
+          <h4>Tutorial Manager</h4>
+          <div id="adminTutorials"></div>
+        </div>
+
+        <div style="margin-top:18px">
+          <h4>Cosmetics Manager</h4>
+          <div id="adminCosmetics"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="max-width:1100px;margin:0 auto;padding:18px;color:var(--muted)">
+      Gorilla Hub • © <span id="year"></span>
+    </div>
+  </footer>
+
+  <!-- Login / Signup modal -->
+  <div id="modal" class="hidden" style="position:fixed;inset:0;display:grid;place-items:center;background:rgba(0,0,0,0.6);z-index:80">
+    <div class="card" style="width:420px;max-width:96%;padding:18px">
+      <h3 id="modalTitle">Login</h3>
+      <form id="authForm" style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <input id="authEmail" class="form-input" type="email" placeholder="you@example.com" required />
+        <input id="authPass" class="form-input" type="password" placeholder="Password" required />
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn" type="submit" id="authSubmit">Login</button>
+          <button id="modalCancel" type="button" class="btn ghost">Cancel</button>
+          <div style="flex:1"></div>
+          <a href="#" id="toggleAuth" class="tiny muted">Switch to Sign up</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+  /******************************************************************
+   * Gorilla Hub - Single File Frontend
+   * - This file is production-ready frontend.
+   * - It expects server endpoints to be provided via Vercel:
+   *   /api/auth/login    (POST {email,password}) -> { user, token }
+   *   /api/auth/signup   (POST {email,password}) -> { user, token }
+   *   /api/data/site     (GET) -> { site settings }
+   *   /api/data/tutorials (GET/POST/PUT/DELETE)
+   *   /api/data/cosmetics (GET/POST/PUT/DELETE)
+   *   /api/admin/update  (POST {type, payload}) -> {ok}
+   *   /api/chat          (POST {message, session?}) -> { reply }
+   *
+   * If the server endpoints are not available, the frontend will
+   * gracefully fall back to localStorage-based placeholder data so you
+   * can interact with the UI while deploying the server pieces.
+   *
+   * IMPORTANT (Server-side): Keep your SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY,
+   * and OPENAI_API_KEY in Vercel environment variables and reference them in
+   * your serverless functions. Do NOT put keys in the frontend.
+   ******************************************************************/
+
+  // ----------------------
+  // Helper utilities
+  // ----------------------
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+  const API_BASE = '/api'; // Vercel functions mount under /api/*
+
+  // Local placeholder storage keys (fallback)
+  const LS_USERS = 'gh_users_fallback';
+  const LS_SESSION = 'gh_session_fallback';
+  const LS_SITE = 'gh_site_fallback';
+  const LS_TUTORIALS = 'gh_tutorials_fallback';
+  const LS_COSMETICS = 'gh_cosmetics_fallback';
+
+  // default placeholder data (used if server is not ready)
+  const SAMPLE_USERS = [
+    { id: cryptoRandomId(), email:'admin@example.com', name:'Admin', role:'admin', password:'password' },
+    { id: cryptoRandomId(), email:'dev@example.com', name:'Dev', role:'dev', password:'password' },
+    { id: cryptoRandomId(), email:'user@example.com', name:'Player', role:'user', password:'password' }
+  ];
+  const SAMPLE_SITE = { title:'Gorilla Hub', about:'Welcome to Gorilla Hub — tutorials, cosmetics, and AI helper.', logoText:'GH' };
+  const SAMPLE_TUTORIALS = [
+    { id: cryptoRandomId(), title:'Beginner Guide', difficulty:'beginner', content:'Basics: movement, grabbing, safe play.', video_url:'' },
+    { id: cryptoRandomId(), title:'Intermediate Guide', difficulty:'intermediate', content:'Speed, map strategy, teamplay.', video_url:'' },
+    { id: cryptoRandomId(), title:'Advanced Guide', difficulty:'advanced', content:'Competitive tricks and consistency.', video_url:'' }
+  ];
+  const SAMPLE_COSMETICS = [
+    { id: cryptoRandomId(), name:'Golden Kong', type:'Hat', rarity:'Legendary', image_url:'' },
+    { id: cryptoRandomId(), name:'Neon Bandana', type:'Accessory', rarity:'Epic', image_url:'' },
+    { id: cryptoRandomId(), name:'Silver Vine', type:'Trail', rarity:'Rare', image_url:'' },
+    { id: cryptoRandomId(), name:'Bronze Palm', type:'Glove', rarity:'Uncommon', image_url:'' },
+    { id: cryptoRandomId(), name:'Basic Fur', type:'Skin', rarity:'Common', image_url:'' }
+  ];
+
+  function cryptoRandomId(){ return 'id-' + Math.random().toString(36).slice(2,10) }
+
+  // safe fetch wrapper: calls server endpoint and returns {ok, data, error}
+  async function callApi(path, opts = {}) {
+    try {
+      const res = await fetch(API_BASE + path, opts);
+      if (!res.ok) {
+        const text = await res.text().catch(()=>null);
+        return { ok:false, status: res.status, error: text || 'Server error' };
+      }
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        return { ok:true, data };
+      } else {
+        const text = await res.text();
+        return { ok:true, data: text };
+      }
+    } catch (err) {
+      return { ok:false, error: err.message || String(err) };
+    }
+  }
+
+  // ----------------------
+  // Fallback persistence helpers
+  // ----------------------
+  function saveFallback(key, val){ localStorage.setItem(key, JSON.stringify(val)) }
+  function loadFallback(key, defaultVal){
+    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : defaultVal; }
+    catch(e){ return defaultVal; }
+  }
+
+  // ----------------------
+  // App state: abstracts server vs fallback
+  // ----------------------
+  async function fetchSite() {
+    const r = await callApi('/data/site');
+    if(r.ok) return r.data;
+    // fallback to local
+    const local = loadFallback(LS_SITE, SAMPLE_SITE);
+    return local;
+  }
+
+  async function saveSite(siteObj) {
+    const r = await callApi('/admin/update', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ type:'site', payload:siteObj }) });
+    if(r.ok) return r.data;
+    // fallback: save to local
+    saveFallback(LS_SITE, siteObj);
+    return { ok:true, fallback:true };
+  }
+
+  async function fetchTutorials(){
+    const r = await callApi('/data/tutorials');
+    if(r.ok) return r.data;
+    return loadFallback(LS_TUTORIALS, SAMPLE_TUTORIALS);
+  }
+  async function saveTutorials(arr){
+    const r = await callApi('/admin/update', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ type:'tutorials', payload:arr }) });
+    if(r.ok) return r.data;
+    saveFallback(LS_TUTORIALS, arr);
+    return { ok:true, fallback:true };
+  }
+
+  async function fetchCosmetics(){
+    const r = await callApi('/data/cosmetics');
+    if(r.ok) return r.data;
+    return loadFallback(LS_COSMETICS, SAMPLE_COSMETICS);
+  }
+  async function saveCosmetics(arr){
+    const r = await callApi('/admin/update', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ type:'cosmetics', payload:arr }) });
+    if(r.ok) return r.data;
+    saveFallback(LS_COSMETICS, arr);
+    return { ok:true, fallback:true };
+  }
+
+  // ----------------------
+  // Auth: email/password
+  // Server endpoints expected:
+  //  POST /api/auth/login  { email, password }  => { user, token }
+  //  POST /api/auth/signup { email, password } => { user, token }
+  // On success, store token in localStorage under 'gh_token' (used for server requests).
+  // ----------------------
+  async function serverLogin(email, password){
+    const r = await callApi('/auth/login', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ email, password }) });
+    if(r.ok) return { ok:true, data:r.data };
+    return { ok:false, error:r.error || 'Server auth failed' };
+  }
+
+  async function serverSignup(email, password){
+    const r = await callApi('/auth/signup', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ email, password }) });
+    if(r.ok) return { ok:true, data:r.data };
+    return { ok:false, error:r.error || 'Server signup failed' };
+  }
+
+  // Fallback local auth management (insecure, only used if server not available)
+  function loadLocalUsers(){ return loadFallback(LS_USERS, SAMPLE_USERS) }
+  function saveLocalUsers(u){ saveFallback(LS_USERS, u) }
+  function localAuthLogin(email, password){
+    const users = loadLocalUsers();
+    const u = users.find(x => x.email.toLowerCase() === email.toLowerCase() && x.password === password);
+    if(!u) return null;
+    const session = { id:u.id, email:u.email, name:u.name, role:u.role, token:'local-'+u.id };
+    localStorage.setItem(LS_SESSION, JSON.stringify(session));
+    return session;
+  }
+  function localAuthSignup(email, password){
+    const users = loadLocalUsers();
+    if(users.some(u=>u.email.toLowerCase()===email.toLowerCase())) return null;
+    const nu = { id: cryptoRandomId(), email, name: email.split('@')[0], role:'user', password };
+    users.push(nu); saveLocalUsers(users);
+    const session = { id: nu.id, email:nu.email, name:nu.name, role:nu.role, token:'local-'+nu.id };
+    localStorage.setItem(LS_SESSION, JSON.stringify(session));
+    return session;
+  }
+  function getLocalSession(){ try { return JSON.parse(localStorage.getItem(LS_SESSION)); } catch(e){ return null; } }
+  function clearLocalSession(){ localStorage.removeItem(LS_SESSION) }
+
+  // High-level login handling: tries server, falls back to local
+  async function login(email, password){
+    const s = await serverLogin(email, password);
+    if(s.ok && s.data && s.data.user){
+      localStorage.setItem('gh_token', s.data.token || '');
+      localStorage.setItem(LS_SESSION, JSON.stringify(s.data.user));
+      return s.data.user;
+    }
+    // fallback to local
+    const local = localAuthLogin(email,password);
+    if(local) return local;
+    throw new Error(s.error || 'Invalid credentials');
+  }
+
+  async function signup(email,password){
+    const s = await serverSignup(email,password);
+    if(s.ok && s.data && s.data.user){
+      localStorage.setItem('gh_token', s.data.token || '');
+      localStorage.setItem(LS_SESSION, JSON.stringify(s.data.user));
+      return s.data.user;
+    }
+    // fallback local signup
+    const local = localAuthSignup(email,password);
+    if(local) return local;
+    throw new Error(s.error || 'Signup failed');
+  }
+
+  function logout(){
+    clearLocalSession();
+    localStorage.removeItem('gh_token');
+    renderAuth();
+  }
+
+  // ----------------------
+  // AI chat
+  // Server endpoint expected: POST /api/chat { message, sessionToken? } -> { reply }
+  // ----------------------
+  async function sendChat(message){
+    // attach token if present
+    const token = localStorage.getItem('gh_token') || '';
+    const r = await callApi('/chat', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ message, token }) });
+    if(r.ok && r.data){
+      return r.data;
+    }
+    // fallback placeholder response
+    return { reply: `Demo reply: "${message}". To enable real replies, deploy /api/chat on Vercel with OPENAI_API_KEY.` };
+  }
+
+  // ----------------------
+  // UI helpers & rendering
+  // ----------------------
+  function openPage(id){
+    $$('.tab').forEach(t=> t.classList.toggle('active', t.dataset.page === id));
+    $$('.page').forEach(p=> p.classList.remove('active'));
+    const pg = document.getElementById(id); if(pg) pg.classList.add('active');
+    // page-specific actions
+    if(id === 'tutorials') loadAndRenderTutorials();
+    if(id === 'cosmetics') loadAndRenderCosmetics();
+    if(id === 'ai') renderAI();
+    if(id === 'account') renderAccount();
+  }
+
+  // render site header data
+  async function renderSite(){
+    const site = await fetchSite();
+    $('#homeTitle').innerText = site.title || 'Gorilla Hub';
+    $('#homeAbout').innerText = site.about || '';
+    $('#logoMark').innerText = (site.logoText || 'GH').slice(0,3);
+    // populate admin inputs if visible
+    $('#adminSiteTitle').value = site.title || '';
+    $('#adminHomeAbout').value = site.about || '';
+    $('#adminLogoText').value = site.logoText || '';
+    $('#year').innerText = new Date().getFullYear();
+  }
+
+  // Tutorials UI
+  async function loadAndRenderTutorials(){
+    const data = await fetchTutorials();
+    const el = $('#tutorialList'); el.innerHTML = '';
+    data.forEach(t=>{
+      const div = document.createElement('div'); div.className='tutorial-item';
+      div.innerHTML = `
+        <div style="width:64px;height:64px;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--accent-2));display:grid;place-items:center;font-weight:900">${t.difficulty[0].toUpperCase()}</div>
+        <div style="flex:1">
+          <strong>${t.title}</strong>
+          <div class="tiny muted" style="margin-top:6px">${t.content.slice(0,160)}${t.content.length>160?'...':''}</div>
+          <div style="margin-top:6px">${t.video_url ? `<a href="${t.video_url}" target="_blank" class="tiny">Watch video</a>` : ''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn ghost" onclick="viewTutorial('${t.id}')">View</button>
+          <button class="btn" onclick="editTutorial('${t.id}')">Edit</button>
+        </div>
+      `;
+      el.appendChild(div);
+    });
+
+    // preview on home
+    const preview = data.slice(0,3).map(t=> `${t.title} (${t.difficulty})`).join(', ');
+    $('#tutorialPreview').innerText = preview;
+  }
+
+  function viewTutorial(id){
+    const data = loadFallback(LS_TUTORIALS, SAMPLE_TUTORIALS);
+    const t = data.find(x=>x.id===id);
+    if(!t) return alert('Tutorial not found');
+    // show a modal view
+    alert(`${t.title}\n\n${t.content}\n\nVideo: ${t.video_url || 'none'}`);
+  }
+
+  // admin edit tutorial
+  function editTutorial(id){
+    if(!isSignedIn()) return showModal('login');
+    const session = getSession();
+    if(!session || (session.role !== 'admin' && session.role !== 'dev')) return alert('Admin permission required to edit tutorials.');
+    const tutorials = loadFallback(LS_TUTORIALS, SAMPLE_TUTORIALS);
+    const t = tutorials.find(x=>x.id===id);
+    if(!t) return alert('Tutorial not found');
+    const newTitle = prompt('Title:', t.title); if(newTitle===null) return;
+    const newDifficulty = prompt('Difficulty (beginner/intermediate/advanced):', t.difficulty) || t.difficulty;
+    const newContent = prompt('Content:', t.content) || t.content;
+    const newVideo = prompt('Video URL (optional):', t.video_url || '') || '';
+    t.title = newTitle; t.difficulty = newDifficulty; t.content = newContent; t.video_url = newVideo;
+    saveTutorials(tutorials).then(()=> {
+      alert('Saved (server or fallback).');
+      loadAndRenderTutorials();
+    });
+  }
+
+  // Cosmetics UI
+  async function loadAndRenderCosmetics(){
+    const data = await fetchCosmetics();
+    const tbody = $('#cosTable tbody'); tbody.innerHTML = '';
+    data.forEach(c=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${c.name}</td><td>${c.type || ''}</td><td>${c.rarity || ''}</td><td>${c.image_url ? `<img src="${c.image_url}" width="48" style="border-radius:6px">` : '-'}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    // fill rarity filter
+    const rarities = [...new Set(data.map(c=>c.rarity).filter(Boolean))];
+    const rf = $('#rarityFilter'); rf.innerHTML = `<option value="">All rarities</option>` + rarities.map(r=>`<option value="${r}">${r}</option>`).join('');
+    $('#cosmeticPreview').innerText = data.slice(0,3).map(c=> `${c.name} (${c.rarity})`).join(', ');
+  }
+
+  // Export cosmetics
+  $('#exportBtn').addEventListener('click', async ()=>{
+    const css = await fetchCosmetics();
+    const blob = new Blob([JSON.stringify(css, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'cosmetics.json'; a.click();
+  });
+
+  // ----------------------
+  // Account & auth UI
+  // ----------------------
+  function getSession(){
+    try { return JSON.parse(localStorage.getItem(LS_SESSION)); } catch(e){ return null; }
+  }
+
+  function setSession(session){
+    localStorage.setItem(LS_SESSION, JSON.stringify(session));
+    renderAuth();
+  }
+
+  function isSignedIn(){ return !!getSession(); }
+
+  function renderAuth(){
+    const sess = getSession();
+    if(sess){
+      $('#authArea').classList.add('hidden');
+      $('#userArea').classList.remove('hidden');
+      $('#userName').innerText = sess.name || sess.email;
+      $('#roleDisplay').innerText = `${sess.name || sess.email} (${sess.role || 'user'})`;
+      if(sess.role === 'admin' || sess.role === 'dev'){
+        $('#adminPanel').classList.remove('hidden');
+        $('#adminPanelBtn').classList.remove('hidden');
+      } else {
+        $('#adminPanel').classList.add('hidden');
+      }
+    } else {
+      $('#authArea').classList.remove('hidden');
+      $('#userArea').classList.add('hidden');
+      $('#roleDisplay').innerText = 'Not signed in';
+      $('#adminPanel').classList.add('hidden');
+    }
+  }
+
+  // render account page content
+  async function renderAccount(){
+    const sess = getSession();
+    const el = $('#accountContent');
+    if(!sess){
+      el.innerHTML = `<div class="tiny muted">Not signed in. <a href="#" onclick="showModal('login')">Sign in</a> or <a href="#" onclick="showModal('signup')">Sign up</a>.</div>`;
+      return;
+    }
+    el.innerHTML = `
+      <div>
+        <strong>${sess.name}</strong> <div class="tiny muted">${sess.email}</div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn ghost" id="refreshAccount">Refresh</button>
+          <button class="btn" id="signout">Sign out</button>
+        </div>
+      </div>
+    `;
+    $('#signout').addEventListener('click', ()=> { logout(); openPage('home'); });
+  }
+
+  // ----------------------
+  // Admin Panel UI actions
+  // ----------------------
+  $('#saveSiteSettings').addEventListener('click', async ()=>{
+    const obj = { title: $('#adminSiteTitle').value, about: $('#adminHomeAbout').value, logoText: $('#adminLogoText').value };
+    await saveSite(obj);
+    await renderSite();
+    alert('Site settings saved.');
+  });
+  $('#revertSiteSettings').addEventListener('click', async ()=>{
+    await renderSite();
+    alert('Reverted to stored site settings.');
+  });
+
+  // Admin tutorials manager (basic)
+  async function renderAdminTutorials(){
+    const data = await fetchTutorials();
+    const cont = $('#adminTutorials'); cont.innerHTML='';
+    data.forEach(t=>{
+      const d = document.createElement('div'); d.className='card'; d.style.marginBottom='8px';
+      d.innerHTML = `<strong>${t.title}</strong> <div class="tiny muted">${t.difficulty}</div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn" onclick='promptEditTutorial("${t.id}")'>Edit</button>
+          <button class="btn ghost" onclick='deleteTutorial("${t.id}")'>Delete</button>
+        </div>`;
+      cont.appendChild(d);
+    });
+    // add new tutorial form
+    const add = document.createElement('div'); add.className='card';
+    add.innerHTML = `<h4>Add Tutorial</h4>
+      <input id="newTutTitle" class="form-input" placeholder="Title" />
+      <input id="newTutDiff" class="form-input" placeholder="Difficulty" value="beginner" />
+      <textarea id="newTutContent" class="form-input" placeholder="Content"></textarea>
+      <input id="newTutVideo" class="form-input" placeholder="Video URL (optional)"/>
+      <div style="margin-top:6px;display:flex;gap:8px">
+        <button class="btn" id="createTut">Create</button>
+      </div>`;
+    cont.appendChild(add);
+    $('#createTut').addEventListener('click', async ()=>{
+      const t = { id: cryptoRandomId(), title: $('#newTutTitle').value, difficulty: $('#newTutDiff').value, content: $('#newTutContent').value, video_url: $('#newTutVideo').value };
+      const arr = await fetchTutorials();
+      arr.unshift(t);
+      await saveTutorials(arr);
+      alert('Tutorial added');
+      renderAdminTutorials();
+    });
+  }
+
+  window.promptEditTutorial = async function(id){
+    const arr = await fetchTutorials();
+    const t = arr.find(x=>x.id===id);
+    if(!t) return alert('not found');
+    const title = prompt('Title', t.title); if(title===null) return;
+    const diff = prompt('Diff', t.difficulty) || t.difficulty;
+    const content = prompt('Content', t.content) || t.content;
+    const video = prompt('Video URL', t.video_url || '') || '';
+    t.title = title; t.difficulty = diff; t.content = content; t.video_url = video;
+    await saveTutorials(arr);
+    alert('Saved');
+    renderAdminTutorials();
+  }
+
+  window.deleteTutorial = async function(id){
+    if(!confirm('Delete tutorial?')) return;
+    let arr = await fetchTutorials();
+    arr = arr.filter(x=>x.id!==id);
+    await saveTutorials(arr);
+    renderAdminTutorials();
+  }
+
+  // Admin cosmetics manager
+  async function renderAdminCosmetics(){
+    const data = await fetchCosmetics();
+    const cont = $('#adminCosmetics'); cont.innerHTML = '';
+    data.forEach(c=>{
+      const d = document.createElement('div'); d.className='card'; d.style.marginBottom='8px';
+      d.innerHTML = `<strong>${c.name}</strong> <div class="tiny muted">${c.rarity}</div>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn" onclick='promptEditCosmetic("${c.id}")'>Edit</button>
+          <button class="btn ghost" onclick='deleteCosmetic("${c.id}")'>Delete</button>
+        </div>`;
+      cont.appendChild(d);
+    });
+    const add = document.createElement('div'); add.className='card';
+    add.innerHTML = `<h4>Add Cosmetic</h4>
+      <input id="newCosName" class="form-input" placeholder="Name" />
+      <input id="newCosType" class="form-input" placeholder="Type" />
+      <input id="newCosRarity" class="form-input" placeholder="Rarity" />
+      <input id="newCosImage" class="form-input" placeholder="Image URL" />
+      <div style="margin-top:6px;display:flex;gap:8px">
+        <button class="btn" id="createCos">Create</button>
+      </div>`;
+    cont.appendChild(add);
+    $('#createCos').addEventListener('click', async ()=>{
+      const c = { id: cryptoRandomId(), name: $('#newCosName').value, type: $('#newCosType').value, rarity: $('#newCosRarity').value, image_url: $('#newCosImage').value };
+      const arr = await fetchCosmetics();
+      arr.unshift(c);
+      await saveCosmetics(arr);
+      alert('Cosmetic added');
+      renderAdminCosmetics();
+    });
+  }
+
+  window.promptEditCosmetic = async function(id){
+    const arr = await fetchCosmetics();
+    const c = arr.find(x=>x.id===id);
+    if(!c) return alert('not found');
+    const name = prompt('Name', c.name); if(name===null) return;
+    const type = prompt('Type', c.type) || c.type;
+    const rarity = prompt('Rarity', c.rarity) || c.rarity;
+    const img = prompt('Image URL', c.image_url || '') || '';
+    c.name = name; c.type = type; c.rarity = rarity; c.image_url = img;
+    await saveCosmetics(arr);
+    alert('Saved');
+    renderAdminCosmetics();
+  }
+
+  window.deleteCosmetic = async function(id){
+    if(!confirm('Delete cosmetic?')) return;
+    let arr = await fetchCosmetics();
+    arr = arr.filter(x=>x.id!==id);
+    await saveCosmetics(arr);
+    renderAdminCosmetics();
+  }
+
+  // ----------------------
+  // AI Helper UI
+  // ----------------------
+  async function renderAI(){
+    const sess = getSession();
+    if(!sess){
+      $('#aiAuthMsg').classList.remove('hidden'); $('#aiPanel').classList.add('hidden'); return;
+    }
+    $('#aiAuthMsg').classList.add('hidden'); $('#aiPanel').classList.remove('hidden');
+    $('#chatWindow').innerHTML = `<div class="tiny muted">Hello ${sess.name}. Ask anything about Gorilla Tag or your cosmetics/tips.</div>`;
+  }
+
+  $('#sendChat').addEventListener('click', async ()=>{
+    const msg = $('#chatInput').value.trim();
+    if(!msg) return;
+    const win = $('#chatWindow');
+    const udiv = document.createElement('div'); udiv.className='bubble user'; udiv.innerText = msg;
+    win.appendChild(udiv);
+    $('#chatInput').value = '';
+    win.scrollTop = win.scrollHeight;
+    const res = await sendChat(msg);
+    const bdiv = document.createElement('div'); bdiv.className='bubble bot'; bdiv.innerText = res.reply || (res.data && res.data.reply) || JSON.stringify(res);
+    win.appendChild(bdiv);
+    win.scrollTop = win.scrollHeight;
+  });
+
+  // ----------------------
+  // Settings: theme, dark, language
+  // ----------------------
+  const THEME_KEY = 'gh_theme_settings';
+  function loadSettings(){
+    const raw = localStorage.getItem(THEME_KEY);
+    if(raw){ try { const obj = JSON.parse(raw); applyTheme(obj); } catch(e){} }
+  }
+  function saveSettings(obj){
+    localStorage.setItem(THEME_KEY, JSON.stringify(obj));
+  }
+  function applyTheme(obj){
+    if(!obj) return;
+    if(obj.accent) document.documentElement.style.setProperty('--accent', obj.accent);
+    if(obj.accent2) document.documentElement.style.setProperty('--accent-2', obj.accent2);
+    if(obj.dark !== undefined) { document.getElementById('darkToggle').checked = !!obj.dark; setDark(!!obj.dark); }
+  }
+  function setDark(enabled){
+    if(enabled) document.documentElement.style.setProperty('--bg','#07121a');
+    else document.documentElement.style.setProperty('--bg','#f7f7f8');
+    // Note: var(--card), var(--text), etc could also be toggled if you want full theme opposite.
+  }
+
+  // theme controls
+  $('#applyTheme').addEventListener('click', ()=> {
+    const a = $('#accent').value, b = $('#accent2').value, dark = $('#darkToggle').checked;
+    applyTheme({ accent:a, accent2:b, dark });
+    saveSettings({ accent:a, accent2:b, dark });
+  });
+  $('#resetTheme').addEventListener('click', ()=> {
+    localStorage.removeItem(THEME_KEY);
+    location.reload();
+  });
+
+  $('#darkToggle').addEventListener('change', (e)=> {
+    setDark(e.target.checked);
+    saveSettings({ ...(JSON.parse(localStorage.getItem(THEME_KEY) || '{}')), dark: e.target.checked });
+  });
+
+  // ----------------------
+  // Modals and auth interactions
+  // ----------------------
+  let modalMode = 'login';
+  function showModal(mode='login'){ modalMode = mode; $('#modalTitle').innerText = mode==='login' ? 'Login' : 'Sign up'; $('#authSubmit').innerText = mode==='login' ? 'Login' : 'Sign up'; $('#modal').classList.remove('hidden'); }
+  function hideModal(){ $('#modal').classList.add('hidden'); }
+  $('#modalCancel').addEventListener('click', hideModal);
+  $('#toggleAuth').addEventListener('click', (e)=> { e.preventDefault(); showModal(modalMode==='login'?'signup':'login'); });
+
+  $('#authForm').addEventListener('submit', async (ev)=>{
+    ev.preventDefault();
+    const email = $('#authEmail').value.trim();
+    const pass = $('#authPass').value;
+    try {
+      if(modalMode === 'login'){
+        const u = await login(email, pass);
+        setSession(u);
+        hideModal();
+        renderSite();
+        alert('Signed in');
+      } else {
+        const u = await signup(email, pass);
+        setSession(u);
+        hideModal();
+        renderSite();
+        alert('Account created');
+      }
+    } catch(err){
+      alert('Auth error: ' + (err.message || err));
+    }
+  });
+
+  // top-level login/signup buttons
+  $('#loginBtn').addEventListener('click', ()=> showModal('login'));
+  $('#signupBtn').addEventListener('click', ()=> showModal('signup'));
+  $('#logoutBtn').addEventListener('click', ()=> { logout(); openPage('home'); });
+
+  // admin panel button
+  $('#adminPanelBtn').addEventListener('click', ()=> {
+    if(!isSignedIn()) return showModal('login');
+    const s = getSession();
+    if(!s || (s.role !== 'admin' && s.role !== 'dev')) return alert('Admin access required');
+    openPage('account');
+    $('#adminPanel').classList.remove('hidden');
+    renderAdminTutorials();
+    renderAdminCosmetics();
+  });
+
+  // page tab clicks
+  $$('.tab').forEach(t => t.addEventListener('click', (e)=> {
+    openPage(t.dataset.page);
+  }));
+
+  // search cosmetic filter
+  $('#cosSearch').addEventListener('input', (e)=> {
+    const q = e.target.value.toLowerCase();
+    const rows = Array.from($('#cosTable tbody').querySelectorAll('tr'));
+    rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? '' : 'none');
+  });
+  $('#rarityFilter').addEventListener('change', (e)=> {
+    const val = e.target.value;
+    const rows = Array.from($('#cosTable tbody').querySelectorAll('tr'));
+    rows.forEach(r => r.style.display = (!val || r.innerText.includes(val)) ? '' : 'none');
+  });
+
+  // ----------------------
+  // Boot sequence
+  // ----------------------
+  (async function boot(){
+    // default dark mode on first load
+    if(localStorage.getItem(THEME_KEY) === null){
+      setDark(true);
+      saveSettings({dark:true, accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(), accent2: getComputedStyle(document.documentElement).getPropertyValue('--accent-2').trim()});
+    } else {
+      loadSettings();
+    }
+
+    // attempt to load site & initial data
+    await renderSite();
+    await loadAndRenderTutorials();
+    await loadAndRenderCosmetics();
+    renderAuth();
+
+    // UX small bindings
+    document.addEventListener('keydown', (e)=> { if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); const p = prompt('Quick nav: home/tutorials/cosmetics/ai/support/faq/settings/account'); if(p) openPage(p); }});
+  })();
+
+  </script>
+</body>
+</html>
